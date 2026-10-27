@@ -31,3 +31,64 @@
    reveals.forEach(el => observer.observe(el));
  } else reveals.forEach(el => el.dataset.visible='true');
  document.getElementById('current-year').textContent = new Date().getFullYear();
+
+ // A tiny van follows the route represented by the desktop navigation.
+ const routeNav = header.querySelector('nav > .lg\\:flex');
+ const routeLinks = [...routeNav.querySelectorAll('a[href^="#"]')];
+ const routeSections = routeLinks.map(link => document.querySelector(link.hash));
+ const routeVan = document.createElement('span');
+ routeVan.className = 'route-van';
+ routeVan.setAttribute('aria-hidden', 'true');
+ routeVan.innerHTML = `<svg viewBox="0 0 48 26" width="40" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+   <path d="M4 5a3 3 0 0 1 3-3h24c3 0 5 2 7 5l5 7v7H3V8a3 3 0 0 1 1-3Z" fill="#f8fafc" stroke="#142336" stroke-width="1.4"/>
+   <path d="M7 5h7v7H7zm10 0h7v7h-7zm10 0h5c1.5 0 2.5 1.5 4 4l2 3H27Z" fill="#365b73"/>
+   <path d="M4 16h38v3H4Z" fill="#33c767"/>
+   <path d="M27 13v8M5 14h3m23 0h3" stroke="#142336" stroke-width="1.1"/>
+   <path d="M40 14h3v3h-3" fill="#ffd56b"/>
+   <circle cx="12" cy="21" r="4" fill="#142336"/><circle cx="35" cy="21" r="4" fill="#142336"/>
+   <circle cx="12" cy="21" r="1.8" fill="#cbd5e1"/><circle cx="35" cy="21" r="1.8" fill="#cbd5e1"/>
+ </svg>`;
+ routeNav.classList.add('route-nav');
+ routeNav.append(routeVan);
+ let routeStops = [];
+ let routeFrame = 0;
+ let lastVanX = null;
+ const updateVan = () => {
+   routeFrame = 0;
+   if (!routeNav.getClientRects().length || !routeStops.length) return;
+   const scroll = window.scrollY;
+   let index = 0;
+   while (index < routeStops.length - 1 && scroll >= routeStops[index + 1].scroll) index++;
+   const start = routeStops[index];
+   const end = routeStops[Math.min(index + 1, routeStops.length - 1)];
+   const progress = end.scroll > start.scroll
+     ? Math.max(0, Math.min(1, (scroll - start.scroll) / (end.scroll - start.scroll))) : 0;
+   const x = start.x + (end.x - start.x) * progress;
+   if (lastVanX !== null && Math.abs(x - lastVanX) > 0.1) {
+     routeVan.style.setProperty('--van-direction', x < lastVanX ? '-1' : '1');
+   }
+   routeVan.style.transform = `translate3d(${x}px, 0, 0)`;
+   lastVanX = x;
+ };
+ const measureRoute = () => {
+   if (!routeNav.getClientRects().length) return;
+   const navBounds = routeNav.getBoundingClientRect();
+   const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+   routeStops = routeLinks.map((link, index) => {
+     const bounds = link.getBoundingClientRect();
+     return {
+       x: bounds.left - navBounds.left + bounds.width / 2 - 20,
+       scroll: index === 0 ? 0 : Math.max(0, Math.min(maxScroll,
+         routeSections[index].getBoundingClientRect().top + window.scrollY - header.offsetHeight - 16))
+     };
+   });
+   lastVanX = null;
+   updateVan();
+ };
+ window.addEventListener('scroll', () => {
+   if (!routeFrame) routeFrame = requestAnimationFrame(updateVan);
+ }, {passive: true});
+ window.addEventListener('resize', measureRoute);
+ window.addEventListener('load', measureRoute);
+ if (document.fonts) document.fonts.ready.then(measureRoute);
+ measureRoute();

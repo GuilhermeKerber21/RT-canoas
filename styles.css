@@ -1287,3 +1287,24 @@
 
 html:not(.js) .reveal{opacity:1;transform:none}
 [hidden]{display:none!important}
+
+/* The header itself is the road: no extra track or background. */
+.route-nav { position: relative; }
+.route-van {
+  position: absolute;
+  left: 0;
+  bottom: -15px;
+  width: 40px;
+  height: 22px;
+  pointer-events: none;
+  line-height: 0;
+  will-change: transform;
+}
+.route-van svg {
+  display: block;
+  transform: scaleX(var(--van-direction, 1));
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-van { display: none; }
+}

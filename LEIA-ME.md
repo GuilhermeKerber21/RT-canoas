@@ -8,7 +8,7 @@ Arquivos:
 - index.html: conteúdo, estrutura, metadados e ícones SVG originais.
 - styles.css: CSS estático gerado dos estilos do código-fonte original, incluindo os pontos de adaptação para celular e computador. Não depende de Tailwind no navegador.
 - script.js: menu móvel, cabeçalho ao rolar, animações de entrada e ano do rodapé.
-- assets/hero-van.jpg: imagem original, sem alteração de qualidade.
+- assets/hero-van.png: imagem da capa do site.
 
 Foram preservados os textos, links, imagem, ícones, medidas e classes da página React. O mapa incorporado depende do Google e de conexão com a internet. O endereço de Facebook continua sendo o endereço genérico presente no projeto original.
 
