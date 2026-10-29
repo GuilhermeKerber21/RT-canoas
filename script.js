@@ -12,15 +12,49 @@
  window.addEventListener('scroll', updateHeader, {passive:true});
  const menuIcon = toggle.innerHTML;
  const closeIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-6 w-6" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
- const setMenu = open => {
+ const applyMenu = open => {
    menu.hidden = !open;
+   header.classList.toggle('mobile-menu-open', open);
+   document.body.classList.toggle('mobile-menu-visible', open);
+   [...header.parentElement.children].forEach(element => {
+     if (element !== header) element.inert = open;
+   });
    toggle.setAttribute('aria-expanded', String(open));
    toggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
    toggle.innerHTML = open ? closeIcon : menuIcon;
+   if (!open && document.activeElement && header.contains(document.activeElement)) toggle.focus();
+ };
+ let menuCloseTimer;
+ const setMenu = open => {
+   clearTimeout(menuCloseTimer);
+   header.classList.remove('mobile-menu-closing');
+   if (open || menu.hidden || window.matchMedia('(prefers-reduced-motion: reduce), (min-width: 1024px)').matches) {
+     applyMenu(open);
+     return;
+   }
+   header.classList.add('mobile-menu-closing');
+   menuCloseTimer = setTimeout(() => {
+     applyMenu(false);
+     header.classList.remove('mobile-menu-closing');
+   }, 200);
  };
  toggle.addEventListener('click', () => setMenu(menu.hidden));
  menu.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', () => setMenu(false)));
  document.addEventListener('keydown', e => {if(e.key === 'Escape') setMenu(false)});
+ document.addEventListener('keydown', e => {
+   if (menu.hidden || e.key !== 'Tab') return;
+   const focusable = [...header.querySelectorAll('a, button')].filter(el => el.getClientRects().length);
+   const first = focusable[0], last = focusable[focusable.length - 1];
+   if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+ });
+ window.matchMedia('(min-width: 1024px)').addEventListener('change', e => {
+   if (e.matches && !menu.hidden) setMenu(false);
+ });
+ const mobileSocials = document.createElement('div');
+ mobileSocials.className = 'mobile-menu-socials';
+ document.querySelectorAll('.footer-social').forEach(link => mobileSocials.append(link.cloneNode(true)));
+ menu.append(mobileSocials);
  const reveals = document.querySelectorAll('.reveal');
  if ('IntersectionObserver' in window) {
    const observer = new IntersectionObserver(entries => {
@@ -53,6 +87,7 @@
  let routeStops = [];
  let routeFrame = 0;
  let lastVanX = null;
+ let activeRouteIndex = -1;
  const updateVan = () => {
    routeFrame = 0;
    if (!routeNav.getClientRects().length || !routeStops.length) return;
@@ -64,6 +99,16 @@
    const progress = end.scroll > start.scroll
      ? Math.max(0, Math.min(1, (scroll - start.scroll) / (end.scroll - start.scroll))) : 0;
    const x = start.x + (end.x - start.x) * progress;
+   // Highlight the navigation stop closest to the van, in either direction.
+   const nearestIndex = routeStops.reduce((nearest, stop, stopIndex) =>
+     Math.abs(stop.x - x) < Math.abs(routeStops[nearest].x - x) ? stopIndex : nearest, 0);
+   if (nearestIndex !== activeRouteIndex) {
+     routeLinks.forEach((link, linkIndex) => {
+       if (linkIndex === nearestIndex) link.setAttribute('aria-current', 'location');
+       else link.removeAttribute('aria-current');
+     });
+     activeRouteIndex = nearestIndex;
+   }
    if (lastVanX !== null && Math.abs(x - lastVanX) > 0.1) {
      routeVan.style.setProperty('--van-direction', x < lastVanX ? '-1' : '1');
    }

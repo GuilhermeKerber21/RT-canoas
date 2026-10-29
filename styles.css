@@ -1288,8 +1288,121 @@
 html:not(.js) .reveal{opacity:1;transform:none}
 [hidden]{display:none!important}
 
+@keyframes mobile-menu-enter {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes mobile-menu-exit {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-12px); }
+}
+@media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
+  .mobile-menu-open #mobile-menu { animation: mobile-menu-enter 280ms ease-out both; }
+  .mobile-menu-open.mobile-menu-closing #mobile-menu { animation: mobile-menu-exit 200ms ease-in both; }
+}
+
+@media (max-width: 1023px) {
+  body.mobile-menu-visible { overflow: hidden; }
+  #site-header.mobile-menu-open {
+    height: 100dvh;
+    background: #fff;
+    color: #142336;
+    backdrop-filter: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .mobile-menu-open > nav {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    min-height: 88px;
+    padding: 20px 58px;
+  }
+  .mobile-menu-open > nav > a { gap: 8px; }
+  .mobile-menu-open > nav > a > span:first-child { display: none; }
+  .mobile-menu-open > nav > a > span { color: #142336; text-align: center; }
+  .mobile-menu-open > nav > a > span > span:first-child { font-size: 16px; }
+  .mobile-menu-open > nav > a > span > span:last-child { font-size: 9px; }
+  .mobile-menu-open #menu-toggle {
+    position: absolute;
+    left: 16px;
+    top: 24px;
+    color: var(--accent);
+  }
+  #mobile-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-height: calc(100dvh - 88px);
+    padding: clamp(24px, 6vh, 64px) 24px 40px;
+    border: 0;
+    background: #fff;
+  }
+  #mobile-menu > a[href^="#"] {
+    color: #142336;
+    border: 0;
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  #mobile-menu > a[href^="#"]:hover,
+  #mobile-menu > a[href^="#"]:focus-visible { color: var(--accent); }
+  #mobile-menu > a[target] { margin-top: 26px; padding: 12px 24px; }
+  .mobile-menu-socials { display: flex; justify-content: center; gap: 18px; margin-top: 36px; }
+  .mobile-menu-socials .footer-social { width: 32px; height: 32px; }
+  .mobile-menu-socials .footer-social-facebook svg { width: 32px; height: 32px; }
+  .mobile-menu-socials .footer-social-whatsapp svg { width: 25px; height: 25px; }
+  #mobile-menu a:focus-visible, .mobile-menu-open button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+}
+
+.reviews-grid figure { padding: 1.5rem; }
+@media (min-width: 1024px) {
+  .reviews-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.footer-columns { text-align: center; }
+.footer-columns > * { min-width: 0; }
+.footer-company, .footer-networks { display: flex; flex-direction: column; align-items: center; }
+.footer-company > .flex, .footer-networks > .flex { justify-content: center; }
+.footer-copyright, .footer-credit { padding-top: 2.5rem; margin-top: auto; }
+.footer-studio-link { color: var(--accent); font-weight: 700; display: inline-block; }
+.footer-studio-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.footer-studio-link:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 2px; }
+@media (min-width: 1024px) {
+  .footer-columns { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.footer-social {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #fff;
+  overflow: hidden;
+  transition: transform 180ms ease;
+}
+.footer-social:hover { transform: translateY(-2px); }
+.footer-social:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.footer-social-facebook {
+  border-radius: 50%;
+  background: linear-gradient(180deg, #18acfb 0%, #0860de 100%);
+}
+.footer-social-whatsapp {
+  border-radius: 11px;
+  background: linear-gradient(180deg, #58fc74 0%, #20b521 100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-social { transition: none; }
+  .footer-social:hover { transform: none; }
+}
+
 /* The header itself is the road: no extra track or background. */
 .route-nav { position: relative; }
+.route-nav a[aria-current="location"] { color: var(--accent); }
 .route-van {
   position: absolute;
   left: 0;
